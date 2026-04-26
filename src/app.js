@@ -21,7 +21,40 @@ app.use(helmet());
 app.use(cors());   
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true })); 
-app.use(morgan('dev')); 
+
+app.use(morgan(function (tokens, req, res) {
+  const reset = '\x1b[0m';
+  const white = '\x1b[97m'; 
+  const green = '\x1b[32m';
+  const magenta = '\x1b[35m';
+  const yellow = '\x1b[33m';
+  const gray = '\x1b[90m';
+
+  const status = tokens.status(req, res);
+  let statusColor = status >= 500 ? '\x1b[31m' 
+    : status >= 400 ? '\x1b[33m' 
+    : status >= 300 ? '\x1b[36m' 
+    : status >= 200 ? '\x1b[32m' 
+    : reset; 
+
+  // 3. Formateo del body aplicando el color verde al JSON
+  const bodyString = Object.keys(req.body || {}).length 
+    ? `\n${green}${JSON.stringify(req.body, null, 2)}${reset}` 
+    : '{}';
+    
+  const queryString = Object.keys(req.query || {}).length 
+    ? '\n' + JSON.stringify(req.query, null, 2) 
+    : '{}';
+
+  return [
+    `${magenta}${tokens.method(req, res)}${reset}`,
+    `${white}${tokens.url(req, res)}${reset}`, 
+    `${statusColor}${status}${reset}`,
+    `${gray}${tokens.res(req, res, 'content-length')} - ${tokens['response-time'](req, res)} ms${reset}`,
+    `\n${yellow}👉 Body:${reset} ${bodyString}`, 
+    `\n${yellow}👉 Query:${reset} ${queryString}`
+  ].join(' ')
+}));
 
 // 2. RUTAS PÚBLICAS
 app.use('/api/auth', require('./routes/authRoutes'));

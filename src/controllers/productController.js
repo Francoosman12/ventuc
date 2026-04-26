@@ -10,7 +10,6 @@ exports.createProduct = async (req, res) => {
             tenantId: req.user.tenantId
         });
         await product.save();
-
         await logAction(req, 'PRODUCT_CREATE', { sku: product.barcode, name: product.name });
         res.status(201).json(product);
     } catch (error) {
