@@ -51,8 +51,8 @@ app.use(morgan(function (tokens, req, res) {
     `${white}${tokens.url(req, res)}${reset}`, 
     `${statusColor}${status}${reset}`,
     `${gray}${tokens.res(req, res, 'content-length')} - ${tokens['response-time'](req, res)} ms${reset}`,
-    `\n${yellow}👉 Body:${reset} ${bodyString}`, 
-    `\n${yellow}👉 Query:${reset} ${queryString}`
+    req.method == 'GET' ? '' : `\n${yellow}👉 Body:${reset} ${bodyString}`,
+    req.method == 'GET' ? '' : `\n${yellow}👉 Query:${reset} ${queryString}`
   ].join(' ')
 }));
 
