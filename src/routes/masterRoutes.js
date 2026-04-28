@@ -3,27 +3,29 @@ const router = express.Router();
 const masterController = require('../controllers/masterController');
 const { protect, authorize } = require('../middlewares/authMiddlewares');
 
-router.get('/tenants/:id', masterController.getTenantDetails);
-
-// Bloquear todo el router para que solo entre el SUPER_ADMIN
+// Bloqueamos TODO el router para que solo entre el SUPER_ADMIN.
 router.use(protect);
 router.use(authorize('SUPER_ADMIN'));
 
-// CAMBIO AQUÍ: Asegúrate que diga '/stats' y no '/overview'
+// === MÉTRICAS GLOBALES ===
 router.get('/stats', masterController.getPlatformOverview);
 
-// El listado de todos los comercios
-router.get('/tenants', async (req, res) => {
-    try {
-        const Tenant = require('../models/Tenant');
-        const tenants = await Tenant.find().sort({ createdAt: -1 });
-        res.json(tenants);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+// === LISTADO DE TENANTS ===
+router.get('/tenants', masterController.listTenants);
+
+// === DETALLE DE UN TENANT ===
+router.get('/tenants/:id', masterController.getTenantDetails);
+
+// === ACCIONES SOBRE UN TENANT ===
 router.put('/tenants/:id', masterController.updateTenantMaster);
-// Cambiar el estado (activar/desactivar) de un comercio
+router.patch('/tenants/:id/plan', masterController.changePlan);
+router.patch('/tenants/:id/features', masterController.updateFeatures);
+router.post('/tenants/:id/extend-trial', masterController.extendTrial);
+router.patch('/tenants/:id/suspend', masterController.suspend);
+router.patch('/tenants/:id/reactivate', masterController.reactivate);
+router.patch('/tenants/:id/mercadopago', masterController.toggleMercadoPago);
+
+// === LEGADO ===
 router.patch('/tenant-toggle/:id', masterController.toggleBusiness);
 
 module.exports = router;

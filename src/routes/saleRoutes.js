@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const saleController = require('../controllers/saleController');
+const { validate } = require('../middlewares/validate');
+const { createSaleSchema } = require('../validators/saleValidators');
 
-router.post('/', saleController.createSale); // Línea 5
-router.get('/', saleController.getSales);    // Línea 6 o 7 (PROBABLE ERROR AQUÍ)
-router.get('/:id', saleController.getSaleById); // Línea 8
-router.get('/by-seller',  saleController.getSalesBySeller);
+// IMPORTANTE: Las rutas estáticas SIEMPRE antes que las dinámicas (/:id) - FIX #2
+router.get('/by-seller', saleController.getSalesBySeller);
+
+router.post('/', validate(createSaleSchema), saleController.createSale);
+router.get('/', saleController.getSales);
+router.get('/:id', saleController.getSaleById);
 
 module.exports = router;
